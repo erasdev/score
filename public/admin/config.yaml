@@ -1,0 +1,18 @@
+backend:
+  name: git-gateway
+  branch: main  # or your default Git branch
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "pdfs"
+    label: "PDFs"
+    folder: "content/pdfs"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "PDF File", name: "file", widget: "file", media_library: { config: { multiple: false } } }
+      - { label: "Tags", name: "tags", widget: "list" }
