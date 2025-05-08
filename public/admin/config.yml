@@ -7,10 +7,6 @@ local_backend: true
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-media_library:
-  name: default
-  max_file_size: 512000
-  folder_support: true
 
 collections:
   - name: "pdfs"
