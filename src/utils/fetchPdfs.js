@@ -18,8 +18,11 @@ for (const file of files) {
   index.push({
     slug: file.replace(/\.md$/, ''),
     title: data.title,
-    description: data.description,
+    artists: data.artists || [],
+    instruments: data.instruments || [],
+    genres: data.genres || [],
     tags: data.tags || [],
+    description: data.description,
     file: data.file, // relative to /public
   });
 }

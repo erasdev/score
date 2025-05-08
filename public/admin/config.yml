@@ -15,7 +15,10 @@ collections:
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Title", name: "title", widget: "string", required: true }
+      - { label: "Artists", name: "artists", widget: "list" } 
+      - { label: "Instruments", name: "instruments", widget: "list" } 
+      - { label: "Genres", name: "genres", widget: "list" } 
       - { label: "Description", name: "description", widget: "text" }
       - { label: "PDF File", name: "file", widget: "file", media_library: { config: { multiple: false } } }
       - { label: "Tags", name: "tags", widget: "list" } 
