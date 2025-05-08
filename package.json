@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node utils/fetchPdfs.js",
+    "prebuild": "node src/utils/fetchPdfs.js",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
