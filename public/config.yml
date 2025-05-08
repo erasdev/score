@@ -2,10 +2,13 @@ backend:
   name: git-gateway
   branch: main
 
+local_backend: true
+
 media_folder: "public/uploads"
 public_folder: "/uploads"
+
 media_library:
-  max_file_size: 512000 # 512kb
+  max_file_size: 512000
   folder_support: true
 
 collections:
