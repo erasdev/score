@@ -8,6 +8,7 @@ media_folder: "public/uploads"
 public_folder: "/uploads"
 
 media_library:
+  name: library
   max_file_size: 512000
   folder_support: true
 
