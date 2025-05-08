@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import type { Pdf } from '../types/pdf';
 
-const pdfs = ref([]);
+const pdfs = ref<Pdf[]>([]);
 
 onMounted(async () => {
   const res = await fetch('/pdf-index.json');

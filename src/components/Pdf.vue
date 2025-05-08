@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-
+import type { Pdf } from '../types/pdf';
 const route = useRoute();
-const pdf = ref(null);
+const pdf = ref<Pdf | null>(null);
 
 onMounted(async () => {
   const res = await fetch('/pdf-index.json');
   const all = await res.json();
-  pdf.value = all.find(p => p.slug === route.params.slug);
+  pdf.value = all.find((p: Pdf) => p.slug === route.params.slug);
 });
 </script>
 
