@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Upload from '../components/Upload.vue'
+import Index from '../components/Index.vue'
 
 
 const routes = [
-  { path: '/upload', name: 'Upload', component: Upload },
+  { path: '/', name: 'Index', component: Index },
   // other routes...
 ]
 
