@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Index from '../components/Index.vue'
+import Home from '../components/Home.vue'
 import Pdf from '../components/Pdf.vue'
 
 const routes = [
-  { path: '/', name: 'Index', component: Index },
+  { path: '/', name: 'Home', component: Home },
   { path: '/pdfs/:slug', name: 'Pdf', component: Pdf },
   // other routes...
 ]
