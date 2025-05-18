@@ -7,4 +7,5 @@ export interface Pdf {
   genres: string[];
   tags: string[];
   file: string;
+  _lastModified?: string;
 }

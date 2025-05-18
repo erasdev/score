@@ -1,13 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import MultiSelectBox from './MultiSelectBox.vue';
 import PdfTable from './PdfTable.vue';
+import LocalStorageBanner from './LocalStorageBanner.vue';
 import type { Pdf } from '../types/pdf';
+import type { SiteConfig } from '../types/site';
 import { useFiltering } from '../composables/useFiltering';
 
 const pdfs = ref<Pdf[]>([]);
+const siteConfig = ref<SiteConfig>({
+  title: "Ricky Bob Dog's Collection",
+  description: "A collection of musical scores and arrangements.",
+  colors: {
+    background: '#ffffff',
+    surface: '#ffffff',
+    text: '#1f2937',
+    accent: '#4f46e5'
+  }
+});
+
+const hasLocalChanges = computed(() => {
+  return pdfs.value.some(pdf => pdf._lastModified) || !!siteConfig.value._lastModified;
+});
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
+
+defineExpose({ pdfs });
 
 // Close filters when clicking outside (only on md and above)
 const handleClickOutside = (event: MouseEvent) => {
@@ -38,22 +56,108 @@ onUnmounted(() => {
 
 
 onMounted(async () => {
+  // Load site configuration
+  try {
+    const configRes = await fetch('/site-config.json');
+    const configData = await configRes.json();
+    const localConfig = loadLocalConfig();
+    
+    if (localConfig && configData) {
+      const hostedTimestamp = new Date(configData._lastModified || 0).getTime();
+      const localTimestamp = new Date(localConfig._lastModified || 0).getTime();
+
+      if (hostedTimestamp > localTimestamp) {
+        localStorage.removeItem('draft:site-config');
+        siteConfig.value = configData;
+      } else {
+        siteConfig.value = localConfig;
+      }
+    } else {
+      siteConfig.value = localConfig || configData;
+    }
+  } catch (error) {
+    console.error('Failed to load site configuration:', error);
+  }
+
+  // Load PDFs
   const res = await fetch('/pdf-index.json');
   const data = await res.json();
-  pdfs.value = data;
+  
+  // Get all draft entries from localStorage
+  const draftEntries = Object.entries(localStorage)
+    .filter(([key]) => key.startsWith('draft:'))
+    .map(([key, value]) => {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        // Silently skip invalid entries instead of logging to console
+        return null;
+      }
+    })
+    .filter(Boolean);
+
+  // Merge draft entries with fetched data
+  const mergedData = [...data];
+  
+  draftEntries.forEach(draft => {
+    const existingIndex = mergedData.findIndex(pdf => pdf.title === draft.title);
+    if (existingIndex !== -1) {
+      const hostedPdf = mergedData[existingIndex];
+      const hostedTimestamp = new Date(hostedPdf._lastModified || 0).getTime();
+      const localTimestamp = new Date(draft._lastModified || 0).getTime();
+
+      // If hosted version is newer, remove from localStorage
+      if (hostedTimestamp > localTimestamp) {
+        const key = `draft:pdfs:${hostedPdf.slug}`;
+        localStorage.removeItem(key);
+        // Use hosted version
+        mergedData[existingIndex] = hostedPdf;
+      } else {
+        // Use local version with merged arrays
+        mergedData[existingIndex] = {
+          ...hostedPdf,
+          ...draft,
+          // Preserve arrays by merging them
+          tags: [...new Set([...(hostedPdf.tags || []), ...(draft.tags || [])])],
+          genres: [...new Set([...(hostedPdf.genres || []), ...(draft.genres || [])])],
+          instruments: [...new Set([...(hostedPdf.instruments || []), ...(draft.instruments || [])])],
+          artists: [...new Set([...(hostedPdf.artists || []), ...(draft.artists || [])])]
+        };
+      }
+    } else {
+      // Add new draft entry
+      mergedData.push(draft);
+    }
+  });
+
+  pdfs.value = mergedData;
 });
+
+function loadLocalConfig(): SiteConfig | null {
+  const localConfig = localStorage.getItem('draft:site-config');
+  if (localConfig) {
+    try {
+      return JSON.parse(localConfig);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 
 </script>
 
 <template>
   <div>
-    <!-- <div class="sm:flex sm:items-center mb-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-semibold text-gray-900">Songs</h1>
-          <p class="mt-2 text-sm text-gray-700">A list of all the songs in the library.</p>
-        </div>
-    </div> -->
+    <LocalStorageBanner 
+      :has-local-changes="hasLocalChanges" 
+      :last-modified="pdfs.find(p => p._lastModified)?._lastModified || siteConfig._lastModified"
+    />
+    <!-- Site Description -->
+    <div class="px-4 sm:px-6 lg:px-8 mb-6">
+      <p class="text-lg text-gray-600">{{ siteConfig.description }}</p>
+    </div>
     <!-- Filter Button -->
     <div class="relative sm:px-6 lg:px-8">
       <div class="flex justify-end">
@@ -61,7 +165,7 @@ onMounted(async () => {
           <button
             data-filter-button
             @click="showFilters = !showFilters"
-            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white shadow-xs ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-colors duration-200"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-base font-medium text-gray-800 bg-white shadow-xs ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-colors duration-200"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
@@ -89,34 +193,34 @@ onMounted(async () => {
               >
                 <div class="p-4 space-y-4 min-h-[320px] flex flex-col">
                   <div>
-                    <label for="search" class="block text-sm font-medium text-gray-900">Search</label>
+                    <label for="search" class="block text-base font-medium text-gray-800">Search</label>
                     <div class="mt-2">
                       <input
                         id="search"
                         v-model="filters.search"
                         type="text"
-                        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600"
+                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600"
                         placeholder="Title or Artist..."
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-900">Tags</label>
+                    <label class="block text-base font-medium text-gray-800">Tags</label>
                     <div class="mt-2">
                       <MultiSelectBox v-model="filters.tags" :options="allTags" placeholder="Select tags" />
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-900">Genres</label>
+                    <label class="block text-base font-medium text-gray-800">Genres</label>
                     <div class="mt-2">
                       <MultiSelectBox v-model="filters.genres" :options="allGenres" placeholder="Select genres" />
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-900">Instruments</label>
+                    <label class="block text-base font-medium text-gray-800">Instruments</label>
                     <div class="mt-2">
                       <MultiSelectBox v-model="filters.instruments" :options="allInstruments" placeholder="Select instruments" />
                     </div>
@@ -125,7 +229,7 @@ onMounted(async () => {
                   <div class="pt-2 mt-auto border-t border-gray-200">
                     <button
                       @click="clearFilters"
-                      class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                      class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-base font-medium text-gray-800 bg-white shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -153,10 +257,10 @@ onMounted(async () => {
       <div v-if="showFilters" class="block md:hidden">
         <div class="p-4 mt-2 space-y-4 min-h-[320px] flex flex-col bg-white rounded-md shadow ring-1 ring-gray-300">
           <div class="flex justify-between items-center">
-            <h2 class="text-lg font-medium text-gray-900">Filters</h2>
+            <h2 class="text-xl font-medium text-gray-800">Filters</h2>
             <button
               @click="showFilters = false"
-              class="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
+              class="inline-flex items-center gap-1.5 px-2 py-1 text-base font-medium text-gray-800 hover:text-gray-900 focus:outline-none"
             >
               <span>Close</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -166,34 +270,34 @@ onMounted(async () => {
           </div>
 
           <div>
-            <label for="search" class="block text-sm font-medium text-gray-900">Search</label>
+            <label for="search" class="block text-base font-medium text-gray-800">Search</label>
             <div class="mt-2">
               <input
                 id="search"
                 v-model="filters.search"
                 type="text"
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600"
+                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600"
                 placeholder="Title or Artist..."
               />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-900">Tags</label>
+            <label class="block text-base font-medium text-gray-800">Tags</label>
             <div class="mt-2">
               <MultiSelectBox v-model="filters.tags" :options="allTags" placeholder="Select tags" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-900">Genres</label>
+            <label class="block text-base font-medium text-gray-800">Genres</label>
             <div class="mt-2">
               <MultiSelectBox v-model="filters.genres" :options="allGenres" placeholder="Select genres" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-900">Instruments</label>
+            <label class="block text-base font-medium text-gray-800">Instruments</label>
             <div class="mt-2">
               <MultiSelectBox v-model="filters.instruments" :options="allInstruments" placeholder="Select instruments" />
             </div>
@@ -202,7 +306,7 @@ onMounted(async () => {
           <div class="pt-2 mt-auto border-t border-gray-200">
             <button
               @click="clearFilters"
-              class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-base font-medium text-gray-800 bg-white shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -222,13 +326,13 @@ onMounted(async () => {
       <div v-for="pdf in filteredPdfs" :key="pdf.title" class="bg-white rounded-lg shadow ring-1 ring-gray-200 overflow-hidden">
         <div class="p-4">
           <div class="space-y-1">
-            <h3 class="text-lg font-medium text-gray-900 break-words">{{ pdf.title }}</h3>
-            <p class="text-sm text-gray-500 break-words">{{ pdf.artists.join(', ') }}</p>
+            <h3 class="text-xl font-medium text-gray-800 break-words">{{ pdf.title }}</h3>
+            <p class="text-base text-gray-600 break-words">{{ pdf.artists.join(', ') }}</p>
           </div>
 
           <div class="mt-3 flex flex-row flex-wrap gap-1">
             <div v-if="pdf.tags.length" class="space-y-1">
-              <span class="sr-only text-xs font-medium text-gray-500">Tags</span>
+              <span class="sr-only text-sm font-medium text-gray-600">Tags</span>
               <div class="flex flex-wrap gap-1">
                 <span v-for="tag in pdf.tags" :key="tag" class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
                   {{ tag }}
@@ -237,7 +341,7 @@ onMounted(async () => {
             </div>
             
             <div v-if="pdf.genres.length" class="space-y-1">
-              <span class="sr-only text-xs font-medium text-gray-500">Genres</span>
+              <span class="sr-only text-sm font-medium text-gray-600">Genres</span>
               <div class="flex flex-wrap gap-1">
                 <span v-for="genre in pdf.genres" :key="genre" class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
                   {{ genre }}
@@ -246,7 +350,7 @@ onMounted(async () => {
             </div>
             
             <div v-if="pdf.instruments.length" class="space-y-1 sm:col-span-2">
-              <span class="sr-only text-xs font-medium text-gray-500">Instruments</span>
+              <span class="sr-only text-sm font-medium text-gray-600">Instruments</span>
               <div class="flex flex-wrap gap-1">
                 <span v-for="instrument in pdf.instruments" :key="instrument" class="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
                   {{ instrument }}
@@ -259,7 +363,7 @@ onMounted(async () => {
             <a
               :href="`/pdfs/${pdf.title}.pdf`"
               target="_blank"
-              class="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              class="inline-flex items-center gap-1.5 text-base font-medium text-indigo-700 hover:text-indigo-800"
             >
               View PDF
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
