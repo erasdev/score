@@ -129,7 +129,7 @@ describe('PDF Storage', () => {
 
     // Mock File object
     const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
-    
+
     // Call handlePdfFileChange and wait for it to complete
     await component.handlePdfFileChange(mockPdf.slug, file);
 
@@ -152,7 +152,7 @@ describe('PDF Storage', () => {
     localStorage.setItem(`draft:pdfs:${mockPdf.slug}:file`, mockBase64Pdf);
 
     // Mock empty file system response
-    (window.fetch as vi.Mock).mockImplementation((url: string) => {
+    (window.fetch as Mock).mockImplementation((url: string) => {
       if (url === '/pdf-index.json') {
         return Promise.resolve({
           json: () => Promise.resolve([])
@@ -194,7 +194,7 @@ describe('PDF Storage', () => {
     localStorage.setItem(`draft:pdfs:${mockPdf.slug}:file`, mockBase64Pdf);
 
     // Mock file system response
-    (window.fetch as vi.Mock).mockImplementation((url: string) => {
+    (window.fetch as Mock).mockImplementation((url: string) => {
       if (url === '/pdf-index.json') {
         return Promise.resolve({
           json: () => Promise.resolve([mockPdf])
@@ -231,7 +231,7 @@ describe('PDF Storage', () => {
     localStorage.setItem(`draft:pdfs:${mockPdf.slug}`, JSON.stringify(mockPdf));
 
     // Mock file system response
-    (window.fetch as vi.Mock).mockImplementation((url: string) => {
+    (window.fetch as Mock).mockImplementation((url: string) => {
       if (url === '/pdf-index.json') {
         return Promise.resolve({
           json: () => Promise.resolve([mockPdf])
@@ -317,7 +317,7 @@ describe('PDF Storage', () => {
     };
 
     // Mock fetch responses
-    (window.fetch as vi.Mock).mockImplementation((url: string) => {
+    (window.fetch as Mock).mockImplementation((url: string) => {
       if (url === '/pdf-index.json') {
         return Promise.resolve({
           json: () => Promise.resolve([testPdf, testPdf2])
