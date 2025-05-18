@@ -1,8 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Home from '../components/Home.vue';
-import Pdf from '../components/Pdf.vue';
-import { createRouter, createWebHistory } from 'vue-router';
 import type { Pdf as PdfType } from '../types/pdf';
 
 
@@ -44,25 +42,6 @@ const mockFetch = vi.fn();
 Object.defineProperty(window, 'fetch', {
   value: mockFetch,
   writable: true
-});
-
-// Create router once for all tests
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      path: '/',
-      component: { template: '<div>Home</div>' }
-    },
-    {
-      path: '/pdf/:slug',
-      component: Pdf
-    },
-    {
-      path: '/pdfs/:slug',
-      component: Pdf
-    }
-  ]
 });
 
 describe('PDF Storage', () => {
@@ -186,7 +165,6 @@ describe('PDF Storage', () => {
     });
 
     const wrapper = mount(Home);
-    const component = wrapper.vm as any;
 
     // Wait for mounted hook to complete
     await wrapper.vm.$nextTick();
