@@ -3,13 +3,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
   hasLocalChanges: boolean;
-  lastModified?: string;
 }>();
-
-const formattedDate = computed(() => {
-  if (!props.lastModified) return '';
-  return new Date(props.lastModified).toLocaleString();
-});
 </script>
 
 <template>
@@ -23,9 +17,6 @@ const formattedDate = computed(() => {
       <div class="ml-3">
         <p class="text-sm text-yellow-700">
           You are viewing local changes that haven't been published yet.
-          <span v-if="formattedDate" class="block mt-1">
-            Last modified: {{ formattedDate }}
-          </span>
         </p>
       </div>
     </div>

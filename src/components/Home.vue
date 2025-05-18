@@ -19,14 +19,25 @@ const siteConfig = ref<SiteConfig>({
   }
 });
 
+// Add a ref to track localStorage changes
+const localStorageVersion = ref(0);
+
+// Update the computed property to use the ref
 const hasLocalChanges = computed(() => {
+  // Access localStorageVersion to make the computed property reactive
+  localStorageVersion.value;
   return Object.keys(localStorage).some(key => key.startsWith('draft:'));
 });
+
+// Add a function to update the localStorage version
+function updateLocalStorageVersion() {
+  localStorageVersion.value++;
+}
 
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
 
-defineExpose({ pdfs, handlePdfFileChange });
+defineExpose({ pdfs, handlePdfFileChange, hasLocalChanges, updateLocalStorageVersion });
 
 // Close filters when clicking outside (only on md and above)
 const handleClickOutside = (event: MouseEvent) => {
@@ -73,6 +84,46 @@ function deepEqual(obj1: any, obj2: any): boolean {
   });
 }
 
+// Function to handle PDF file changes
+async function handlePdfFileChange(slug: string, file: File) {
+  try {
+    await savePdfToLocalStorage(slug, file);
+    
+    // Create or update the PDF entry in localStorage
+    const existingPdf = pdfs.value.find(p => p.slug === slug);
+    
+    const updatedPdf = existingPdf ? {
+      ...existingPdf,
+      file: `draft:pdfs:${slug}:file`
+    } : {
+      slug,
+      title: file.name.replace('.pdf', ''),
+      description: '',
+      artists: [],
+      instruments: [],
+      genres: [],
+      tags: [],
+      file: `draft:pdfs:${slug}:file`
+    };
+
+    // Store in localStorage
+    localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
+
+    // Update the PDF in the list if it exists
+    const index = pdfs.value.findIndex(p => p.slug === slug);
+    if (index !== -1) {
+      pdfs.value[index] = updatedPdf;
+    } else {
+      pdfs.value.push(updatedPdf);
+    }
+
+    // Update localStorage version to trigger reactivity
+    updateLocalStorageVersion();
+  } catch (error) {
+    console.error('Failed to save PDF file:', error);
+  }
+}
+
 async function savePdfToLocalStorage(slug: string, file: File | Blob): Promise<void> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -89,29 +140,6 @@ async function savePdfToLocalStorage(slug: string, file: File | Blob): Promise<v
   });
 }
 
-// Function to handle PDF file changes
-async function handlePdfFileChange(slug: string, file: File) {
-  try {
-    await savePdfToLocalStorage(slug, file);
-    // Update the PDF entry in localStorage
-    const existingPdf = pdfs.value.find(p => p.slug === slug);
-    if (existingPdf) {
-      const updatedPdf = {
-        ...existingPdf,
-        file: URL.createObjectURL(file)
-      };
-      localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
-      // Update the PDF in the list
-      const index = pdfs.value.findIndex(p => p.slug === slug);
-      if (index !== -1) {
-        pdfs.value[index] = updatedPdf;
-      }
-    }
-  } catch (error) {
-    console.error('Failed to save PDF file:', error);
-  }
-}
-
 onMounted(async () => {
   // Load site configuration
   try {
@@ -119,10 +147,12 @@ onMounted(async () => {
     const configData = await configRes.json();
     const localConfig = loadLocalConfig();
     
-    if (localConfig) {
+    if (localConfig && !deepEqual(localConfig, configData)) {
       siteConfig.value = localConfig;
     } else {
       siteConfig.value = configData;
+      // Remove local config if it's identical to hosted
+      localStorage.removeItem('draft:site-config');
     }
   } catch (error) {
     console.error('Failed to load site configuration:', error);
@@ -134,15 +164,10 @@ onMounted(async () => {
   
   // Get all draft entries from localStorage
   const draftEntries = Object.entries(localStorage)
-    .filter(([key]) => key.startsWith('draft:'))
+    .filter(([key]) => key.startsWith('draft:pdfs:') && !key.endsWith(':file'))
     .map(([key, value]) => {
       try {
-        const draft = JSON.parse(value);
-        // If this is a PDF file entry, load the actual file
-        if (key.startsWith('draft:pdfs:') && key.endsWith(':file')) {
-          return null; // Skip file entries as we'll handle them separately
-        }
-        return draft;
+        return JSON.parse(value);
       } catch (e) {
         return null;
       }
@@ -202,10 +227,8 @@ function loadLocalConfig(): SiteConfig | null {
 </script>
 
 <template>
-  <div>
-    <LocalStorageBanner 
-      :has-local-changes="hasLocalChanges" 
-    />
+  <div class="container mx-auto px-4 py-8">
+    <LocalStorageBanner :has-local-changes="hasLocalChanges" />
     <!-- Site Description -->
     <div class="px-4 sm:px-6 lg:px-8 mb-6">
       <p class="text-lg text-gray-600">{{ siteConfig.description }}</p>
