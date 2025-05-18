@@ -6,7 +6,10 @@ import type { Pdf } from '../types/pdf';
 
 const route = useRoute();
 const pdf = ref<Pdf | null>(null);
-const hasLocalChanges = computed(() => !!pdf.value?._lastModified);
+const hasLocalChanges = computed(() => {
+  const localPdf = localStorage.getItem(`draft:pdfs:${route.params.slug}`);
+  return !!localPdf;
+});
 
 onMounted(async () => {
   const res = await fetch('/pdf-index.json');
@@ -61,7 +64,6 @@ function loadLocalPdf(slug: string) {
     <div v-if="pdf" class="p-4">
       <LocalStorageBanner 
         :has-local-changes="hasLocalChanges" 
-        :last-modified="pdf._lastModified"
       />
       <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ pdf.title }}</h1>
       <p class="text-lg mb-6 text-gray-600">{{ pdf.description }}</p>

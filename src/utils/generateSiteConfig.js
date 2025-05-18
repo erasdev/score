@@ -1,4 +1,4 @@
-import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { writeFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const defaultConfig = {
@@ -10,7 +10,6 @@ const defaultConfig = {
     text: '#1f2937',        // Gray-800
     accent: '#4f46e5',      // Indigo-600
   },
-  _lastModified: new Date().toISOString()
 };
 
 // Ensure the public directory exists
@@ -21,6 +20,27 @@ if (!existsSync(publicDir)) {
 
 // Write the site configuration to a file
 const configPath = join(publicDir, 'site-config.json');
-writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+
+// Check if config already exists and preserve it if it does
+let existingConfig = defaultConfig;
+if (existsSync(configPath)) {
+  try {
+    const fileContent = readFileSync(configPath, 'utf-8');
+    const parsed = JSON.parse(fileContent);
+    // Preserve existing values while ensuring all required fields exist
+    existingConfig = {
+      ...defaultConfig,
+      ...parsed,
+      colors: {
+        ...defaultConfig.colors,
+        ...parsed.colors
+      }
+    };
+  } catch (error) {
+    console.error('Error reading existing config:', error);
+  }
+}
+
+writeFileSync(configPath, JSON.stringify(existingConfig, null, 2));
 
 console.log('Site configuration file generated successfully.'); 

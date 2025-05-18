@@ -30,16 +30,11 @@
         const collection = entry.get('collection');
         const slug = entry.get('slug');
 
-        // Add timestamp to the data
-        const dataWithTimestamp = {
-          ...data,
-          _lastModified: new Date().toISOString()
-        };
 
         const key = `draft:${collection}:${slug}`;
-        localStorage.setItem(key, JSON.stringify(dataWithTimestamp));
+        localStorage.setItem(key, JSON.stringify(data));
 
-        console.log(`[NetlifyCMS] Saved to localStorage: ${key}`, dataWithTimestamp);
+        console.log(`[NetlifyCMS] Saved to localStorage: ${key}`, data);
       },
     });
   </script>

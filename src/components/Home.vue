@@ -20,25 +20,13 @@ const siteConfig = ref<SiteConfig>({
 });
 
 const hasLocalChanges = computed(() => {
-  // Check if there are any PDFs with local changes
-  const hasLocalPdfChanges = pdfs.value.length > 0 && 
-    pdfs.value.some(pdf => {
-      if (!pdf._lastModified) return false;
-      const localTime = new Date(pdf._lastModified).getTime();
-      const currentTime = Date.now();
-      return localTime > currentTime;
-    });
-  
-  // Check if site config has local changes
-  const hasLocalConfigChanges = Boolean(siteConfig.value._lastModified && 
-    new Date(siteConfig.value._lastModified).getTime() > Date.now());
-
-  return Boolean(hasLocalPdfChanges || hasLocalConfigChanges);
+  return Object.keys(localStorage).some(key => key.startsWith('draft:'));
 });
+
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
 
-defineExpose({ pdfs });
+defineExpose({ pdfs, handlePdfFileChange });
 
 // Close filters when clicking outside (only on md and above)
 const handleClickOutside = (event: MouseEvent) => {
@@ -67,6 +55,62 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
+function deepEqual(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) return true;
+  if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) return false;
+  
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  
+  if (keys1.length !== keys2.length) return false;
+  
+  return keys1.every(key => {
+    if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+      return obj1[key].length === obj2[key].length && 
+             obj1[key].every((item: any, i: number) => deepEqual(item, obj2[key][i]));
+    }
+    return deepEqual(obj1[key], obj2[key]);
+  });
+}
+
+async function savePdfToLocalStorage(slug: string, file: File | Blob): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      try {
+        localStorage.setItem(`draft:pdfs:${slug}:file`, reader.result as string);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Function to handle PDF file changes
+async function handlePdfFileChange(slug: string, file: File) {
+  try {
+    await savePdfToLocalStorage(slug, file);
+    // Update the PDF entry in localStorage
+    const existingPdf = pdfs.value.find(p => p.slug === slug);
+    if (existingPdf) {
+      const updatedPdf = {
+        ...existingPdf,
+        file: URL.createObjectURL(file)
+      };
+      localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
+      // Update the PDF in the list
+      const index = pdfs.value.findIndex(p => p.slug === slug);
+      if (index !== -1) {
+        pdfs.value[index] = updatedPdf;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to save PDF file:', error);
+  }
+}
 
 onMounted(async () => {
   // Load site configuration
@@ -75,18 +119,10 @@ onMounted(async () => {
     const configData = await configRes.json();
     const localConfig = loadLocalConfig();
     
-    if (localConfig && configData) {
-      const hostedTimestamp = new Date(configData._lastModified || 0).getTime();
-      const localTimestamp = new Date(localConfig._lastModified || 0).getTime();
-
-      if (hostedTimestamp > localTimestamp) {
-        localStorage.removeItem('draft:site-config');
-        siteConfig.value = configData;
-      } else {
-        siteConfig.value = localConfig;
-      }
+    if (localConfig) {
+      siteConfig.value = localConfig;
     } else {
-      siteConfig.value = localConfig || configData;
+      siteConfig.value = configData;
     }
   } catch (error) {
     console.error('Failed to load site configuration:', error);
@@ -99,11 +135,15 @@ onMounted(async () => {
   // Get all draft entries from localStorage
   const draftEntries = Object.entries(localStorage)
     .filter(([key]) => key.startsWith('draft:'))
-    .map(([_, value]) => {
+    .map(([key, value]) => {
       try {
-        return JSON.parse(value);
+        const draft = JSON.parse(value);
+        // If this is a PDF file entry, load the actual file
+        if (key.startsWith('draft:pdfs:') && key.endsWith(':file')) {
+          return null; // Skip file entries as we'll handle them separately
+        }
+        return draft;
       } catch (e) {
-        // Silently skip invalid entries instead of logging to console
         return null;
       }
     })
@@ -112,36 +152,37 @@ onMounted(async () => {
   // Merge draft entries with fetched data
   const mergedData = [...data];
   
-  draftEntries.forEach(draft => {
-    const existingIndex = mergedData.findIndex(pdf => pdf.title === draft.title);
+  for (const draft of draftEntries) {
+    const existingIndex = mergedData.findIndex(pdf => pdf.slug === draft.slug);
+    
+    // Check if we have a local PDF file
+    const localPdfKey = `draft:pdfs:${draft.slug}:file`;
+    const localPdfFile = localStorage.getItem(localPdfKey);
+    
     if (existingIndex !== -1) {
       const hostedPdf = mergedData[existingIndex];
-      const hostedTimestamp = new Date(hostedPdf._lastModified || 0).getTime();
-      const localTimestamp = new Date(draft._lastModified || 0).getTime();
-
-      // If hosted version is newer, remove from localStorage
-      if (hostedTimestamp > localTimestamp) {
+      
+      // If they're identical and no local file, remove from localStorage
+      if (deepEqual(hostedPdf, draft) && !localPdfFile) {
         const key = `draft:pdfs:${hostedPdf.slug}`;
         localStorage.removeItem(key);
-        // Use hosted version
+        localStorage.removeItem(localPdfKey);
         mergedData[existingIndex] = hostedPdf;
       } else {
-        // Use local version with merged arrays
+        // Use local version with local file if available
         mergedData[existingIndex] = {
-          ...hostedPdf,
           ...draft,
-          // Preserve arrays by merging them
-          tags: [...new Set([...(hostedPdf.tags || []), ...(draft.tags || [])])],
-          genres: [...new Set([...(hostedPdf.genres || []), ...(draft.genres || [])])],
-          instruments: [...new Set([...(hostedPdf.instruments || []), ...(draft.instruments || [])])],
-          artists: [...new Set([...(hostedPdf.artists || []), ...(draft.artists || [])])]
+          file: localPdfFile || hostedPdf.file
         };
       }
     } else {
-      // Add new draft entry
-      mergedData.push(draft);
+      // Add new draft entry with local file if available
+      mergedData.push({
+        ...draft,
+        file: localPdfFile || draft.file
+      });
     }
-  });
+  }
 
   pdfs.value = mergedData;
 });
@@ -158,14 +199,12 @@ function loadLocalConfig(): SiteConfig | null {
   return null;
 }
 
-
 </script>
 
 <template>
   <div>
     <LocalStorageBanner 
       :has-local-changes="hasLocalChanges" 
-      :last-modified="pdfs.length > 0 ? pdfs.find((p: Pdf) => p._lastModified)?._lastModified : siteConfig._lastModified"
     />
     <!-- Site Description -->
     <div class="px-4 sm:px-6 lg:px-8 mb-6">

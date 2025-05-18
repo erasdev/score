@@ -7,5 +7,4 @@ export interface SiteConfig {
     text: string;        // Main text color
     accent: string;      // Accent color for interactive elements
   };
-  _lastModified?: string;
 } 

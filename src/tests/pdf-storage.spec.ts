@@ -1,19 +1,10 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Home from '../components/Home.vue';
 import Pdf from '../components/Pdf.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import type { Pdf as PdfType } from '../types/pdf';
-import type { ComponentPublicInstance } from 'vue';
 
-// Add type definitions for component instances
-interface HomeInstance extends ComponentPublicInstance {
-  pdfs: PdfType[];
-}
-
-interface PdfInstance extends ComponentPublicInstance {
-  pdf: PdfType;
-}
 
 // Configure Vitest
 vi.useFakeTimers();
@@ -28,8 +19,7 @@ const mockPdfData: PdfType[] = [
     tags: ['tag1', 'tag2'],
     genres: ['genre1'],
     instruments: ['piano'],
-    artists: ['Artist 1'],
-    _lastModified: '2024-03-20T10:00:00.000Z' // Older timestamp
+    artists: ['Artist 1']
   },
   {
     title: 'Test PDF 2',
@@ -39,8 +29,7 @@ const mockPdfData: PdfType[] = [
     tags: ['tag3'],
     genres: ['genre2'],
     instruments: ['guitar'],
-    artists: ['Artist 2'],
-    _lastModified: '2024-03-20T10:00:00.000Z'
+    artists: ['Artist 2']
   }
 ];
 
@@ -76,20 +65,20 @@ const router = createRouter({
   ]
 });
 
-// Update the mountWithRouter function to use proper typing
-const mountWithRouter = <T extends ComponentPublicInstance>(component: any, options = {}) => {
-  return mount(component, {
-    global: {
-      plugins: [router],
-      stubs: {
-        RouterLink: true
-      }
-    },
-    ...options
-  }) as unknown as ReturnType<typeof mount<T>>;
-};
+describe('PDF Storage', () => {
+  const mockPdf: PdfType = {
+    slug: 'test-pdf',
+    title: 'Test PDF',
+    description: 'Test Description',
+    artists: ['Test Artist'],
+    instruments: ['Piano'],
+    genres: ['Classical'],
+    tags: ['test'],
+    file: '/pdfs/test-pdf.pdf'
+  };
 
-describe('PDF Storage Integration', () => {
+  const mockBase64Pdf = 'data:application/pdf;base64,JVBERi0xLjcKJeLjz9MKN';
+
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
@@ -101,210 +90,126 @@ describe('PDF Storage Integration', () => {
     });
   });
 
-  describe('Home Component', () => {
-    it('should use local version when it is newer than hosted version', async () => {
-      // Setup local storage with newer draft data
-      const draftData = {
-        title: 'Test PDF 1',
-        slug: 'test-pdf-1',
-        description: 'Updated Description',
-        tags: ['new-tag'],
-        genres: ['new-genre'],
-        instruments: ['new-instrument'],
-        artists: ['New Artist'],
-        _lastModified: '2024-03-21T10:00:00.000Z' // Newer timestamp
-      };
-
-      localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
-
-      // Mount component
-      const wrapper = mountWithRouter<HomeInstance>(Home);
-
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
-
-      // Get the merged data
-      const mergedData: PdfType[] = wrapper.vm.pdfs;
-
-      // Verify the merged data
-      expect(mergedData).toHaveLength(2);
-
-      // Find the merged PDF
-      const mergedPdf = mergedData.find((p: PdfType) => p.slug === 'test-pdf-1');
-      expect(mergedPdf).toBeDefined();
-
-      // Verify merged fields
-      expect(mergedPdf?.description).toBe('Updated Description');
-      expect(mergedPdf?.tags).toContain('tag1');
-      expect(mergedPdf?.tags).toContain('tag2');
-      expect(mergedPdf?.tags).toContain('new-tag');
-    });
-
-    it('should use hosted version and remove local version when hosted is newer', async () => {
-      // Setup local storage with older draft data
-      const draftData = {
-        title: 'Test PDF 1',
-        slug: 'test-pdf-1',
-        description: 'Updated Description',
-        tags: ['new-tag'],
-        genres: ['new-genre'],
-        instruments: ['new-instrument'],
-        artists: ['New Artist'],
-        _lastModified: '2024-03-19T10:00:00.000Z' // Older timestamp
-      };
-
-      localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
-
-      // Mount component
-      const wrapper = mountWithRouter<HomeInstance>(Home);
-
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
-
-      // Verify localStorage was cleaned up
-      expect(localStorage.getItem('draft:pdfs:test-pdf-1')).toBeNull();
-
-      // Get the merged data
-      const mergedData: PdfType[] = wrapper.vm.pdfs;
-
-      // Verify the data matches hosted version
-      expect(mergedData).toHaveLength(2);
-      const pdf = mergedData.find((p: PdfType) => p.slug === 'test-pdf-1');
-      expect(pdf).toEqual(mockPdfData[0]);
-    });
-
-    it('should handle invalid local storage data gracefully', async () => {
-      // Setup invalid local storage data
-      localStorage.setItem('draft:pdfs:test-pdf-1', 'invalid-json');
-
-      // Mount component
-      const wrapper = mountWithRouter<HomeInstance>(Home);
-
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
-
-      // Verify the data is still valid
-      const mergedData: PdfType[] = wrapper.vm.pdfs;
-      expect(mergedData).toHaveLength(2);
-      expect(mergedData).toEqual(mockPdfData);
-    });
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  describe('Pdf Component', () => {
-    it('should use local version when it is newer than hosted version', async () => {
-      // Setup local storage with newer draft data
-      const draftData = {
-        title: 'Test PDF 1',
-        slug: 'test-pdf-1',
-        description: 'Updated Description',
-        tags: ['new-tag'],
-        genres: ['new-genre'],
-        instruments: ['new-instrument'],
-        artists: ['New Artist'],
-        _lastModified: '2024-03-21T10:00:00.000Z' // Newer timestamp
-      };
+  it('should store PDF in localStorage', async () => {
+    const wrapper = mount(Home);
+    const component = wrapper.vm as any;
 
-      localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
+    // Mock File object
+    const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+    
+    // Call handlePdfFileChange
+    await component.handlePdfFileChange(mockPdf.slug, file);
 
-      // Set up the route
-      await router.push('/pdf/test-pdf-1');
-      await router.isReady();
+    // Check if PDF was stored in localStorage
+    const storedPdf = localStorage.getItem(`draft:pdfs:${mockPdf.slug}`);
+    const storedFile = localStorage.getItem(`draft:pdfs:${mockPdf.slug}:file`);
 
-      // Mount component
-      const wrapper = mountWithRouter<PdfInstance>(Pdf);
+    expect(storedPdf).toBeTruthy();
+    expect(storedFile).toBeTruthy();
+    expect(storedFile?.startsWith('data:application/pdf;base64,')).toBe(true);
+  });
 
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
+  it('should load PDF from localStorage when not in file system', async () => {
+    // Store mock PDF in localStorage
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}`, JSON.stringify(mockPdf));
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}:file`, mockBase64Pdf);
 
-      // Get the merged data
-      const mergedPdf:PdfType = wrapper.vm.pdf;
-
-      // Verify merged fields
-      expect(mergedPdf).toBeDefined();
-      expect(mergedPdf?.description).toBe('Updated Description');
-      expect(mergedPdf?.tags).toContain('tag1');
-      expect(mergedPdf?.tags).toContain('tag2');
-      expect(mergedPdf?.tags).toContain('new-tag');
+    // Mock empty file system response
+    (window.fetch as any).mockImplementation((url: string) => {
+      if (url === '/pdf-index.json') {
+        return Promise.resolve({
+          json: () => Promise.resolve([])
+        });
+      }
+      return Promise.reject(new Error('Not found'));
     });
 
-    it('should use hosted version and remove local version when hosted is newer', async () => {
-      // Setup local storage with older draft data
-      const draftData = {
-        title: 'Test PDF 1',
-        slug: 'test-pdf-1',
-        description: 'Updated Description',
-        tags: ['new-tag'],
-        genres: ['new-genre'],
-        instruments: ['new-instrument'],
-        artists: ['New Artist'],
-        _lastModified: '2024-03-19T10:00:00.000Z' // Older timestamp
-      };
+    const wrapper = mount(Home);
+    const component = wrapper.vm as any;
 
-      localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
+    // Wait for mounted hook to complete
+    await wrapper.vm.$nextTick();
 
-      // Set up the route
-      await router.push('/pdf/test-pdf-1');
-      await router.isReady();
+    // Check if PDF was loaded from localStorage
+    expect(component.pdfs).toHaveLength(1);
+    expect(component.pdfs[0].slug).toBe(mockPdf.slug);
+    expect(component.pdfs[0].file).toBe(mockBase64Pdf);
+  });
 
-      // Mount component
-      const wrapper = mountWithRouter<PdfInstance>(Pdf);
+  it('should use local PDF over file system PDF when different', async () => {
+    // Store modified PDF in localStorage
+    const modifiedPdf = {
+      ...mockPdf,
+      title: 'Modified Title'
+    };
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}`, JSON.stringify(modifiedPdf));
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}:file`, mockBase64Pdf);
 
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
-
-      // Verify localStorage was cleaned up
-      expect(localStorage.getItem('draft:pdfs:test-pdf-1')).toBeNull();
-
-      // Get the merged data
-      const pdf = wrapper.vm.pdf;
-
-      // Verify the data matches hosted version
-      expect(pdf).toBeDefined();
-      expect(pdf).toEqual(mockPdfData[0]);
+    // Mock file system response
+    (window.fetch as any).mockImplementation((url: string) => {
+      if (url === '/pdf-index.json') {
+        return Promise.resolve({
+          json: () => Promise.resolve([mockPdf])
+        });
+      }
+      return Promise.reject(new Error('Not found'));
     });
 
-    it('should handle missing local storage data', async () => {
-      // Set up the route
-      await router.push('/pdf/test-pdf-1');
-      await router.isReady();
+    const wrapper = mount(Home);
+    const component = wrapper.vm as any;
 
-      // Mount component
-      const wrapper = mountWithRouter<PdfInstance>(Pdf);
+    // Wait for mounted hook to complete
+    await wrapper.vm.$nextTick();
 
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
+    // Check if modified PDF was used
+    expect(component.pdfs).toHaveLength(1);
+    expect(component.pdfs[0].title).toBe('Modified Title');
+    expect(component.pdfs[0].file).toBe(mockBase64Pdf);
+  });
 
-      // Verify the data matches the fetched data
-      const pdf = wrapper.vm.pdf;
-      expect(pdf).toBeDefined();
-      expect(pdf).toEqual(mockPdfData[0]);
+  it('should remove localStorage entry when PDF matches file system', async () => {
+    // Store identical PDF in localStorage
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}`, JSON.stringify(mockPdf));
+
+    // Mock file system response
+    (window.fetch as any).mockImplementation((url: string) => {
+      if (url === '/pdf-index.json') {
+        return Promise.resolve({
+          json: () => Promise.resolve([mockPdf])
+        });
+      }
+      return Promise.reject(new Error('Not found'));
     });
 
-    it('should handle invalid local storage data gracefully', async () => {
-      // Setup invalid local storage data
-      localStorage.setItem('draft:pdfs:test-pdf-1', 'invalid-json');
+    const wrapper = mount(Home);
+    const component = wrapper.vm as any;
 
-      // Set up the route
-      await router.push('/pdf/test-pdf-1');
-      await router.isReady();
+    // Wait for mounted hook to complete
+    await wrapper.vm.$nextTick();
 
-      // Mount component
-      const wrapper = mountWithRouter<PdfInstance>(Pdf);
+    // Check if localStorage entry was removed
+    expect(localStorage.getItem(`draft:pdfs:${mockPdf.slug}`)).toBeNull();
+  });
 
-      // Wait for fetch and next tick
-      await vi.runAllTimersAsync();
-      await wrapper.vm.$nextTick();
+  it('should handle hasLocalChanges correctly', async () => {
+    const wrapper = mount(Home);
+    const component = wrapper.vm as any;
 
-      // Verify the data matches the fetched data
-      const pdf = wrapper.vm.pdf;
-      expect(pdf).toBeDefined();
-      expect(pdf).toEqual(mockPdfData[0]);
-    });
+    // Initially no local changes
+    expect(component.hasLocalChanges).toBe(false);
+
+    // Add local PDF
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}`, JSON.stringify(mockPdf));
+    localStorage.setItem(`draft:pdfs:${mockPdf.slug}:file`, mockBase64Pdf);
+
+    // Wait for changes to be detected
+    await wrapper.vm.$nextTick();
+
+    // Should now have local changes
+    expect(component.hasLocalChanges).toBe(true);
   });
 });
