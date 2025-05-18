@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Home from '../components/Home.vue';
 import Pdf from '../components/Pdf.vue';
@@ -45,15 +45,11 @@ const mockPdfData: PdfType[] = [
 ];
 
 // Mock localStorage
-const mockLocalStorage = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  clear: vi.fn(),
-  removeItem: vi.fn(),
-  length: 0,
-  key: vi.fn()
-};
-
+vi.fn();
+vi.fn();
+vi.fn();
+vi.fn();
+vi.fn();
 // Mock fetch
 const mockFetch = vi.fn();
 Object.defineProperty(window, 'fetch', {
@@ -98,7 +94,7 @@ describe('PDF Storage Integration', () => {
     // Reset all mocks
     vi.clearAllMocks();
     localStorage.clear();
-    
+
     // Mock fetch to return our test data
     mockFetch.mockResolvedValue({
       json: () => Promise.resolve(mockPdfData)
@@ -118,26 +114,26 @@ describe('PDF Storage Integration', () => {
         artists: ['New Artist'],
         _lastModified: '2024-03-21T10:00:00.000Z' // Newer timestamp
       };
-      
+
       localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
 
       // Mount component
       const wrapper = mountWithRouter<HomeInstance>(Home);
-      
+
       // Wait for fetch and next tick
       await vi.runAllTimersAsync();
       await wrapper.vm.$nextTick();
 
       // Get the merged data
-      const mergedData = wrapper.vm.pdfs;
+      const mergedData: PdfType[] = wrapper.vm.pdfs;
 
       // Verify the merged data
       expect(mergedData).toHaveLength(2);
-      
+
       // Find the merged PDF
       const mergedPdf = mergedData.find((p: PdfType) => p.slug === 'test-pdf-1');
       expect(mergedPdf).toBeDefined();
-      
+
       // Verify merged fields
       expect(mergedPdf?.description).toBe('Updated Description');
       expect(mergedPdf?.tags).toContain('tag1');
@@ -157,12 +153,12 @@ describe('PDF Storage Integration', () => {
         artists: ['New Artist'],
         _lastModified: '2024-03-19T10:00:00.000Z' // Older timestamp
       };
-      
+
       localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
 
       // Mount component
       const wrapper = mountWithRouter<HomeInstance>(Home);
-      
+
       // Wait for fetch and next tick
       await vi.runAllTimersAsync();
       await wrapper.vm.$nextTick();
@@ -171,7 +167,7 @@ describe('PDF Storage Integration', () => {
       expect(localStorage.getItem('draft:pdfs:test-pdf-1')).toBeNull();
 
       // Get the merged data
-      const mergedData = wrapper.vm.pdfs;
+      const mergedData: PdfType[] = wrapper.vm.pdfs;
 
       // Verify the data matches hosted version
       expect(mergedData).toHaveLength(2);
@@ -185,13 +181,13 @@ describe('PDF Storage Integration', () => {
 
       // Mount component
       const wrapper = mountWithRouter<HomeInstance>(Home);
-      
+
       // Wait for fetch and next tick
       await vi.runAllTimersAsync();
       await wrapper.vm.$nextTick();
 
       // Verify the data is still valid
-      const mergedData = wrapper.vm.pdfs;
+      const mergedData: PdfType[] = wrapper.vm.pdfs;
       expect(mergedData).toHaveLength(2);
       expect(mergedData).toEqual(mockPdfData);
     });
@@ -210,7 +206,7 @@ describe('PDF Storage Integration', () => {
         artists: ['New Artist'],
         _lastModified: '2024-03-21T10:00:00.000Z' // Newer timestamp
       };
-      
+
       localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
 
       // Set up the route
@@ -225,7 +221,7 @@ describe('PDF Storage Integration', () => {
       await wrapper.vm.$nextTick();
 
       // Get the merged data
-      const mergedPdf = wrapper.vm.pdf;
+      const mergedPdf:PdfType = wrapper.vm.pdf;
 
       // Verify merged fields
       expect(mergedPdf).toBeDefined();
@@ -247,7 +243,7 @@ describe('PDF Storage Integration', () => {
         artists: ['New Artist'],
         _lastModified: '2024-03-19T10:00:00.000Z' // Older timestamp
       };
-      
+
       localStorage.setItem('draft:pdfs:test-pdf-1', JSON.stringify(draftData));
 
       // Set up the route
@@ -311,4 +307,4 @@ describe('PDF Storage Integration', () => {
       expect(pdf).toEqual(mockPdfData[0]);
     });
   });
-}); 
+});
