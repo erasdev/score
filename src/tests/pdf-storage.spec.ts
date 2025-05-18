@@ -1,9 +1,8 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { Mock } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Home from '../components/Home.vue';
 import type { Pdf as PdfType } from '../types/pdf';
-import PdfTable from '../components/PdfTable.vue';
-import PdfTableRow from '../components/PdfTableRow.vue';
 
 // Mock router-link component
 const RouterLink = {
@@ -21,7 +20,7 @@ class MockFileReader {
   onerror: ((error: any) => void) | null = null;
   result: string | null = null;
 
-  readAsDataURL(blob: Blob) {
+  readAsDataURL() {
     this.result = 'data:application/pdf;base64,JVBERi0xLjcKJeLjz9MKN';
     if (this.onloadend) {
       this.onloadend();
@@ -94,7 +93,7 @@ describe('PDF Storage', () => {
     window.FileReader = MockFileReader as any;
 
     // Mock fetch to return our test data
-    (window.fetch as vi.Mock).mockImplementation((url: string) => {
+    (window.fetch as Mock).mockImplementation((url: string) => {
       if (url === '/pdf-index.json') {
         return Promise.resolve({
           json: () => Promise.resolve(mockPdfData)

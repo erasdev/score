@@ -165,7 +165,7 @@ onMounted(async () => {
   // Get all draft entries from localStorage
   const draftEntries = Object.entries(localStorage)
     .filter(([key]) => key.startsWith('draft:pdfs:') && !key.endsWith(':file'))
-    .map(([key, value]) => {
+    .map(([_, value]) => {
       try {
         return JSON.parse(value);
       } catch (e) {
