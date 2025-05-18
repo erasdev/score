@@ -323,7 +323,10 @@ function loadLocalConfig(): SiteConfig | null {
       class="block md:hidden space-y-4 transition-all mt-2 duration-300 ease-out"
       :class="{ 'translate-y-0 delay-200': !showFilters, 'translate-y-[10px]': showFilters }"
     >
-      <div v-for="pdf in filteredPdfs" :key="pdf.title" class="bg-white rounded-lg shadow ring-1 ring-gray-200 overflow-hidden">
+      <div v-if="filteredPdfs.length === 0" class="bg-white rounded-lg shadow ring-1 ring-gray-200 p-8 text-center">
+        <p class="text-lg text-gray-600">No scores available yet. Check back soon!</p>
+      </div>
+      <div v-else v-for="pdf in filteredPdfs" :key="pdf.title" class="bg-white rounded-lg shadow ring-1 ring-gray-200 overflow-hidden">
         <div class="p-4">
           <div class="space-y-1">
             <h3 class="text-xl font-medium text-gray-800 break-words">{{ pdf.title }}</h3>
@@ -378,7 +381,10 @@ function loadLocalConfig(): SiteConfig | null {
 
     <!-- Desktop Table View -->
     <div class="hidden md:block">
-      <PdfTable :pdfs="filteredPdfs" />
+      <div v-if="filteredPdfs.length === 0" class="bg-white rounded-lg shadow ring-1 ring-gray-200 p-8 text-center">
+        <p class="text-lg text-gray-600">No scores available yet. Check back soon!</p>
+      </div>
+      <PdfTable v-else :pdfs="filteredPdfs" />
     </div>
   </div>
 </template>
