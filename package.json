@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "tsc -p tsconfig.node.json && node dist/utils/fetchPdfs.js && node dist/utils/generateSiteConfig.js",
+    "prebuild": "node src/utils/fetchPdfs.js && node src/utils/generateSiteConfig.js",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",

@@ -2,25 +2,13 @@
   {
     "slug": "old-time-feeling",
     "title": "Old time feeling",
-    "artists": [ "John Doe" ],
-    "instruments": [  "uke", "guitar" ],
-    "genres": [ "old time", "folk" ],
+    "artists": [],
+    "instruments": [],
+    "genres": [],
     "tags": [
       "uke"
     ],
     "description": "old time feeling description",
-    "file": "/uploads/old-time-feeling-in-c-for-uke-.pdf"
-  },
-  {
-    "slug": "different-kind-of-love",
-    "title": "Different kind of love",
-    "artists": [ "Jack Johnson" ],
-    "instruments": [  "piano" ],
-    "genres": [ "soft rock" ],
-    "tags": [
-      "easy"
-    ],
-    "description": "different kind of love description",
     "file": "/uploads/old-time-feeling-in-c-for-uke-.pdf"
   }
 ]

@@ -1,8 +1,7 @@
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type { SiteConfig } from '../types/site';
 
-const defaultConfig: SiteConfig = {
+const defaultConfig = {
   title: "Ricky Bob Dog's Collection",
   description: "A collection of musical scores and arrangements.",
   colors: {
