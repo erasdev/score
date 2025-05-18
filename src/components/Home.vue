@@ -20,7 +20,20 @@ const siteConfig = ref<SiteConfig>({
 });
 
 const hasLocalChanges = computed(() => {
-  return pdfs.value.some(pdf => pdf._lastModified) || !!siteConfig.value._lastModified;
+  // Check if there are any PDFs with local changes
+  const hasLocalPdfChanges = pdfs.value.length > 0 && 
+    pdfs.value.some(pdf => {
+      if (!pdf._lastModified) return false;
+      const localTime = new Date(pdf._lastModified).getTime();
+      const currentTime = Date.now();
+      return localTime > currentTime;
+    });
+  
+  // Check if site config has local changes
+  const hasLocalConfigChanges = siteConfig.value._lastModified && 
+    new Date(siteConfig.value._lastModified).getTime() > Date.now();
+
+  return hasLocalPdfChanges || hasLocalConfigChanges;
 });
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
@@ -152,7 +165,7 @@ function loadLocalConfig(): SiteConfig | null {
   <div>
     <LocalStorageBanner 
       :has-local-changes="hasLocalChanges" 
-      :last-modified="pdfs.find(p => p._lastModified)?._lastModified || siteConfig._lastModified"
+      :last-modified="pdfs.length > 0 ? pdfs.find((p: Pdf) => p._lastModified)?._lastModified : siteConfig._lastModified"
     />
     <!-- Site Description -->
     <div class="px-4 sm:px-6 lg:px-8 mb-6">
