@@ -1,31 +1,27 @@
-
-import fs from 'fs';
-import path from 'path';
+import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import matter from 'gray-matter';
 
-const contentDir = path.resolve('content/pdfs');
-const outputPath = path.resolve('public/pdf-index.json');
-
-const files = fs.readdirSync(contentDir);
-const index = [];
-
-for (const file of files) {
-  if (!file.endsWith('.md')) continue;
-
-  const raw = fs.readFileSync(path.join(contentDir, file), 'utf8');
-  const { data } = matter(raw);
-
-  index.push({
-    slug: file.replace(/\.md$/, ''),
-    title: data.title,
-    artists: data.artists || [],
-    instruments: data.instruments || [],
-    genres: data.genres || [],
-    tags: data.tags || [],
-    description: data.description,
-    file: data.file, // relative to /public
-  });
+// Ensure the content/pdfs directory exists
+const pdfsDir = join(process.cwd(), 'content', 'pdfs');
+if (!existsSync(pdfsDir)) {
+  mkdirSync(pdfsDir, { recursive: true });
 }
 
-fs.writeFileSync(outputPath, JSON.stringify(index, null, 2));
-console.log(`✅ PDF index generated: ${outputPath}`);
+// Get all PDF files
+const pdfFiles = readdirSync(pdfsDir).filter(file => file.endsWith('.pdf'));
+
+// Create index file
+const indexPath = join(process.cwd(), 'public', 'pdf-index.json');
+writeFileSync(indexPath, JSON.stringify(pdfFiles.map(file => ({
+  title: file.replace('.pdf', ''),
+  slug: file.replace('.pdf', ''),
+  description: '',
+  file: `/pdfs/${file}`,
+  tags: [],
+  genres: [],
+  instruments: [],
+  artists: []
+})), null, 2));
+
+console.log('PDF index file generated successfully.');
