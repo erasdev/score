@@ -30,10 +30,10 @@ const hasLocalChanges = computed(() => {
     });
   
   // Check if site config has local changes
-  const hasLocalConfigChanges = siteConfig.value._lastModified && 
-    new Date(siteConfig.value._lastModified).getTime() > Date.now();
+  const hasLocalConfigChanges = Boolean(siteConfig.value._lastModified && 
+    new Date(siteConfig.value._lastModified).getTime() > Date.now());
 
-  return hasLocalPdfChanges || hasLocalConfigChanges;
+  return Boolean(hasLocalPdfChanges || hasLocalConfigChanges);
 });
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
