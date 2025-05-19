@@ -4,12 +4,10 @@ import { join } from 'node:path';
 const defaultConfig = {
   title: "Ricky Bob Dog's Collection",
   description: "A collection of musical scores and arrangements.",
-  colors: {
-    background: '#ffffff',  // White
-    surface: '#ffffff',     // White
-    text: '#1f2937',        // Gray-800
-    accent: '#4f46e5',      // Indigo-600
-  },
+  background: '#ffffff',  // White
+  surface: '#ffffff',     // White
+  text: '#1f2937',        // Gray-800
+  accent: '#4f46e5',      // Indigo-600
 };
 
 // Ensure the public directory exists
@@ -31,10 +29,6 @@ if (existsSync(configPath)) {
     existingConfig = {
       ...defaultConfig,
       ...parsed,
-      colors: {
-        ...defaultConfig.colors,
-        ...parsed.colors
-      }
     };
   } catch (error) {
     console.error('Error reading existing config:', error);
