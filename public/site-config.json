@@ -1,6 +1,10 @@
 {
   "title": "Ricky Bob Edited Dog's Collection",
   "description": "A collection of musical scores and arrangements.",
+  "background": "#ffffff",
+  "surface": "#ffffff",
+  "text": "#1f2937",
+  "accent": "#4f46e5",
   "colors": {
     "background": "#ffffff",
     "surface": "#ffffff",

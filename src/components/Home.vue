@@ -4,19 +4,18 @@ import MultiSelectBox from './MultiSelectBox.vue';
 import PdfTable from './PdfTable.vue';
 import LocalStorageBanner from './LocalStorageBanner.vue';
 import type { Pdf } from '../types/pdf';
-import type { SiteConfig } from '../types/site';
 import { useFiltering } from '../composables/useFiltering';
+import fetchSiteConfig, {type SiteConfig } from '../helpers/fetchSiteConfig';
+import fetchPdfs from '../helpers/fetchPdfs';
 
 const pdfs = ref<Pdf[]>([]);
 const siteConfig = ref<SiteConfig>({
   title: "Ricky Bob Dog's Collection",
   description: "A collection of musical scores and arrangements.",
-  colors: {
-    background: '#ffffff',
-    surface: '#ffffff',
-    text: '#1f2937',
-    accent: '#4f46e5'
-  }
+  background: '#ffffff',
+  surface: '#ffffff',
+  text: '#1f2937',
+  accent: '#4f46e5'
 });
 
 // Add a ref to track localStorage changes
@@ -37,7 +36,7 @@ function updateLocalStorageVersion() {
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
 
-defineExpose({ pdfs, handlePdfFileChange, hasLocalChanges, updateLocalStorageVersion });
+defineExpose({ pdfs, hasLocalChanges, updateLocalStorageVersion });
 
 // Close filters when clicking outside (only on md and above)
 const handleClickOutside = (event: MouseEvent) => {
@@ -66,163 +65,53 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-function deepEqual(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) return true;
-  if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) return false;
-  
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-  
-  if (keys1.length !== keys2.length) return false;
-  
-  return keys1.every(key => {
-    if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
-      return obj1[key].length === obj2[key].length && 
-             obj1[key].every((item: any, i: number) => deepEqual(item, obj2[key][i]));
-    }
-    return deepEqual(obj1[key], obj2[key]);
-  });
-}
 
-// Function to handle PDF file changes
-async function handlePdfFileChange(slug: string, file: File) {
-  try {
-    await savePdfToLocalStorage(slug, file);
+
+// // Function to handle PDF file changes
+// async function handlePdfFileChange(slug: string, file: File) {
+//   try {
     
-    // Create or update the PDF entry in localStorage
-    const existingPdf = pdfs.value.find(p => p.slug === slug);
+//     // Create or update the PDF entry in localStorage
+//     const existingPdf = pdfs.value.find(p => p.slug === slug);
     
-    const updatedPdf = existingPdf ? {
-      ...existingPdf,
-      file: `draft:pdfs:${slug}:file`
-    } : {
-      slug,
-      title: file.name.replace('.pdf', ''),
-      description: '',
-      artists: [],
-      instruments: [],
-      genres: [],
-      tags: [],
-      file: `draft:pdfs:${slug}:file`
-    };
+//     const updatedPdf = existingPdf ? {
+//       ...existingPdf,
+//       file: `draft:pdfs:${slug}:file`
+//     } : {
+//       slug,
+//       title: file.name.replace('.pdf', ''),
+//       description: '',
+//       artists: [],
+//       instruments: [],
+//       genres: [],
+//       tags: [],
+//       file: `draft:pdfs:${slug}:file`
+//     };
 
-    // Store in localStorage
-    localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
+//     // Store in localStorage
+//     localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
 
-    // Update the PDF in the list if it exists
-    const index = pdfs.value.findIndex(p => p.slug === slug);
-    if (index !== -1) {
-      pdfs.value[index] = updatedPdf;
-    } else {
-      pdfs.value.push(updatedPdf);
-    }
+//     // Update the PDF in the list if it exists
+//     const index = pdfs.value.findIndex(p => p.slug === slug);
+//     if (index !== -1) {
+//       pdfs.value[index] = updatedPdf;
+//     } else {
+//       pdfs.value.push(updatedPdf);
+//     }
 
-    // Update localStorage version to trigger reactivity
-    updateLocalStorageVersion();
-  } catch (error) {
-    console.error('Failed to save PDF file:', error);
-  }
-}
+//     // Update localStorage version to trigger reactivity
+//     updateLocalStorageVersion();
+//   } catch (error) {
+//     console.error('Failed to save PDF file:', error);
+//   }
+// }
 
-async function savePdfToLocalStorage(slug: string, file: File | Blob): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      try {
-        localStorage.setItem(`draft:pdfs:${slug}:file`, reader.result as string);
-        resolve();
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
 onMounted(async () => {
-  // Load site configuration
-  try {
-    const configRes = await fetch('/site-config.json');
-    const configData = await configRes.json();
-    const localConfig = loadLocalConfig();
-    
-    if (localConfig && !deepEqual(localConfig, configData)) {
-      siteConfig.value = localConfig;
-    } else {
-      siteConfig.value = configData;
-      // Remove local config if it's identical to hosted
-      localStorage.removeItem('draft:site-config');
-    }
-  } catch (error) {
-    console.error('Failed to load site configuration:', error);
-  }
-
-  // Load PDFs
-  const res = await fetch('/pdf-index.json');
-  const data = await res.json();
-  
-  // Get all draft entries from localStorage
-  const draftEntries = Object.entries(localStorage)
-    .filter(([key]) => key.startsWith('draft:pdfs:') && !key.endsWith(':file'))
-    .map(([_, value]) => {
-      try {
-        return JSON.parse(value);
-      } catch (e) {
-        return null;
-      }
-    })
-    .filter(Boolean);
-
-  // Merge draft entries with fetched data
-  const mergedData = [...data];
-  
-  for (const draft of draftEntries) {
-    const existingIndex = mergedData.findIndex(pdf => pdf.slug === draft.slug);
-    
-    // Check if we have a local PDF file
-    const localPdfKey = `draft:pdfs:${draft.slug}:file`;
-    const localPdfFile = localStorage.getItem(localPdfKey);
-    
-    if (existingIndex !== -1) {
-      const hostedPdf = mergedData[existingIndex];
-      
-      // If they're identical and no local file, remove from localStorage
-      if (deepEqual(hostedPdf, draft) && !localPdfFile) {
-        const key = `draft:pdfs:${hostedPdf.slug}`;
-        localStorage.removeItem(key);
-        localStorage.removeItem(localPdfKey);
-        mergedData[existingIndex] = hostedPdf;
-      } else {
-        // Use local version with local file if available
-        mergedData[existingIndex] = {
-          ...draft,
-          file: localPdfFile || hostedPdf.file
-        };
-      }
-    } else {
-      // Add new draft entry with local file if available
-      mergedData.push({
-        ...draft,
-        file: localPdfFile || draft.file
-      });
-    }
-  }
-
-  pdfs.value = mergedData;
+  siteConfig.value = await fetchSiteConfig();
+  pdfs.value = await fetchPdfs();
 });
 
-function loadLocalConfig(): SiteConfig | null {
-  const localConfig = localStorage.getItem('draft:site-config');
-  if (localConfig) {
-    try {
-      return JSON.parse(localConfig);
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
 
 </script>
 
