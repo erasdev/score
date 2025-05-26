@@ -45,7 +45,7 @@ defineProps<{
             <a
               :href="`/pdfs/${pdf.title}.pdf`"
               target="_blank"
-              class="inline-flex items-center gap-1.5 text-base font-medium text-indigo-700 hover:text-indigo-800"
+              class="inline-flex items-center gap-1.5 text-base font-medium text-accent hover:text-accent-dark"
             >
               View PDF
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

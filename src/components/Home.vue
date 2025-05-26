@@ -2,6 +2,8 @@
 import SiteDescription from './SiteDescription.vue';
 import DynamicFiltersTemplate from './DynamicFiltersTemplate.vue';
 import DynamicPdfListTemplate from './DynamicPdfListTemplate.vue';
+
+
 </script>
 
 <template>
