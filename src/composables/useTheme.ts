@@ -64,10 +64,10 @@ export function useTheme() {
       Object.entries(config).forEach(([key, value]) => {
         if(key.startsWith('color-')) {
           const oklchValue = hexToOklch(value);
-          root.style.setProperty(`--color-${key}`, oklchValue);
+          root.style.setProperty(`--${key}`, oklchValue);
           
           // Generate and set accent variants if this is the accent color
-          if (key === 'accent') {
+          if (key === 'color-accent') {
             const darkAccent = adjustOklchLightness(oklchValue, -0.1);
             const lightAccent = adjustOklchLightness(oklchValue, 0.1);
             root.style.setProperty('--color-accent-dark', darkAccent);
