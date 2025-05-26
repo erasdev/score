@@ -19,8 +19,8 @@ onMounted(async () => {
 
 <template>
   <div v-if="pdf" class="p-4">
-    <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ pdf.title }}</h1>
-    <p class="text-lg mb-6 text-gray-600">{{ pdf.description }}</p>
+    <h1 class="text-3xl font-bold mb-4 text-text-dark">{{ pdf.title }}</h1>
+    <p class="text-lg mb-6 text-text-light">{{ pdf.description }}</p>
     <iframe :src="pdf.file" class="w-full h-[80vh]" />
   </div>
 </template>

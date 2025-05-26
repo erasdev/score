@@ -75,12 +75,12 @@ onUnmounted(() => {
           <span
             v-for="option in modelValue"
             :key="option"
-            class="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-sm text-accent-dark"
+            class="inline-flex items-center gap-1 rounded bg-accent-dark/10 px-2 py-0.5 text-sm text-accent-dark"
           >
             {{ option }}
             <button
               @click.stop="removeOption(option)"
-              class="text-accent-light hover:text-accent-dark"
+              class="text-accent-dark hover:text-accent-dark"
             >
               ×
             </button>
@@ -98,10 +98,10 @@ onUnmounted(() => {
             v-for="option in options"
             :key="option"
             @click.stop="toggleOption(option)"
-            class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-accent-dark hover:text-accent-light"
-            :class="{ 'bg-accent-light': modelValue.includes(option) }"
+            class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-accent-dark/10 hover:text-accent-dark"
+            :class="{ 'bg-accent-dark/10 text-accent-dark': modelValue.includes(option) }"
           >
-            <span class="block truncate text" :class="{ 'font-medium': modelValue.includes(option) }">
+            <span class="block truncate text" :class="{ '': modelValue.includes(option) }">
               {{ option }}
             </span>
             <span

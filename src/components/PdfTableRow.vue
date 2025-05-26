@@ -22,12 +22,12 @@ defineProps<{
         <a
           :href="`/pdfs/${pdf.slug}`"
           download
-          class="text-accent hover:text-accent-dark"
+          class="text-accent-dark hover:text-accent-dark/90"
         >
           <span class="sr-only">Download {{ pdf.title }}</span>
           <DownloadIcon />
         </a>
-        <router-link :to="`/pdfs/${pdf.slug}`" class="text-accent hover:text-accent-dark">
+        <router-link :to="`/pdfs/${pdf.slug}`" class="text-accent-dark hover:text-accent-dark/90">
           <span class="sr-only">View {{ pdf.title }}</span>
           <ViewIcon />
         </router-link>

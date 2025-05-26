@@ -15,7 +15,7 @@ onMounted(async () => {
 <template>
     <div class="flex justify-between mx-auto w-full items-center">
       <router-link to="/">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 px-4">
             <img src="../assets/dog.svg" alt="Logo" class="size-16 md:size-25" />
             <span class="text-2xl font-semibold tracking-tight text-text-dark md:text-4xl">{{ siteConfig?.title }}</span>
         </div>
