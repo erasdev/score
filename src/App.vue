@@ -3,9 +3,11 @@ import Navigation from './components/Navigation.vue';
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-4 space-y-8">
-    <navigation />
-    <router-view></router-view>
+  <div class="max-w-6xl mx-auto p-4 py-8 space-y-8">
+    <navigation/>
+    <div>
+      <router-view></router-view>
+    </div>
   </div>
 
 </template>
