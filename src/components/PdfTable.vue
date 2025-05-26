@@ -65,7 +65,7 @@ const goToPage = (page: number) => {
     <div class="flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          <table class="min-w-full ring-1 ring-inset ring-gray-300 bg-gray-50 overflow-hidden rounded-md">
+          <table class="min-w-full ring-1 ring-inset ring-gray-300 bg-surface-dark overflow-hidden rounded-md">
             <thead>
               <tr>
                 <SortableTableHeader
@@ -119,21 +119,21 @@ const goToPage = (page: number) => {
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="relative inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="relative inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-text-dark hover:bg-surface-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-text-dark hover:bg-surface-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>
         </div>
         <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
-            <p class="text-base text-gray-700">
+            <p class="text-base text-text-dark">
               Showing
               <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
               to
@@ -148,7 +148,7 @@ const goToPage = (page: number) => {
               <button
                 @click="goToPage(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center rounded-l-md px-2 py-2 bg-surface text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 bg-surface text-text-light ring-1 ring-inset ring-gray-300 hover:bg-surface-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span class="sr-only">Previous</span>
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -162,8 +162,8 @@ const goToPage = (page: number) => {
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold',
                   page === currentPage
-                    ? 'z-10 bg-accent text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 bg-surface focus:outline-offset-0'
+                    ? 'z-10 bg-accent-light text-accent-dark focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+                    : 'text-text-dark ring-1 ring-inset ring-gray-300 hover:bg-surface-light focus:z-20 bg-surface focus:outline-offset-0'
                 ]"
               >
                 {{ page }}

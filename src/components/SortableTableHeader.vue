@@ -19,12 +19,12 @@ const handleClick = () => {
 </script>
   
 <template>
-  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-text-dark">
     <button @click="handleClick" class="group inline-flex items-center">
       {{ label }}
       <span :class="[
         'ml-2 flex-none rounded-sm',
-        currentSortKey === sortKey ? 'bg-gray-100 text-gray-900' : 'text-gray-400 group-hover:text-gray-500'
+        currentSortKey === sortKey ? 'bg-surface-light text-text-dark' : 'text-text-light group-hover:text-text-dark'
       ]">
         <ChevronDownIcon :class="[
           'size-5',

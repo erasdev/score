@@ -10,13 +10,13 @@ defineProps<{
 <template>
   <tr>
     <td class="px-3 py-5 text-base whitespace-nowrap">
-      <div class="font-medium text-gray-800">{{ pdf.title }}</div>
+      <div class="font-medium text-text-dark">{{ pdf.title }}</div>
     </td>
-    <td class="px-3 py-5 text-base whitespace-nowrap text-gray-600">
-      <div class="mt-1 text-gray-600">{{ pdf.artists.join(', ') }}</div>
+    <td class="px-3 py-5 text-base whitespace-nowrap text-text-light">
+      <div class="mt-1 text-text-light">{{ pdf.artists.join(', ') }}</div>
     </td>
-    <td class="px-3 py-5 text-base whitespace-nowrap text-gray-600">{{ pdf.instruments.join(', ') }}</td>
-    <td class="px-3 py-5 text-base whitespace-nowrap text-gray-600">{{ pdf.tags.join(', ') }}</td>
+    <td class="px-3 py-5 text-base whitespace-nowrap text-text-light">{{ pdf.instruments.join(', ') }}</td>
+    <td class="px-3 py-5 text-base whitespace-nowrap text-text-light">{{ pdf.tags.join(', ') }}</td>
     <td class="relative py-5 pr-4 pl-3 text-right text-base font-medium whitespace-nowrap">
       <div class="flex justify-end gap-2">
         <a

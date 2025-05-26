@@ -17,10 +17,17 @@ collections:
         fields:
           - { label: "Site Title", name: "title", widget: "string", required: true }
           - { label: "Site Description", name: "description", widget: "text", required: false }
-          - { label: "Background Color", name: "color-background", widget: "string", required: false }
-          - { label: "Surface Color", name: "color-surface", widget: "string", required: false }
-          - { label: "Text Color", name: "color-text", widget: "string", required: false }
-          - { label: "Accent Color", name: "color-accent", widget: "string", required: false }
+
+          - { label: "Background Color", name: "color-background", widget: "color", required: false }
+
+          - { label: "Light Surface Color", name: "color-surface-light", widget: "color", required: false }
+          - { label: "Dark Surface Color", name: "color-surface-dark", widget: "color", required: false }
+
+          - { label: "Light Text Color", name: "color-text-light", widget: "color", required: false }
+          - { label: "Dark Text Color", name: "color-text-dark", widget: "color", required: false }
+
+          - { label: "Light Accent Color", name: "color-accent-light", widget: "color", required: false }
+          - { label: "Dark Accent Color", name: "color-accent-dark", widget: "color", required: false }
           
   - name: "pdfs"
     label: "PDFs"
