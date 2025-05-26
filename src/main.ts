@@ -3,7 +3,7 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
-import { useTheme } from './composables/useTheme'
+import { applyTheme } from './utils/applyTheme'
 
 const pinia = createPinia()
 
@@ -11,7 +11,7 @@ const app = createApp(App)
 app.use(router)
 app.use(pinia)
 
-// Initialize theme
-useTheme()
-
-app.mount('#app')
+// Apply theme before mounting
+applyTheme().then(() => {
+  app.mount('#app')
+})
