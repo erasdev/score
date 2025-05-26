@@ -19,24 +19,6 @@
         }
       });
     }
-
-
-
-
-    window.CMS.registerEventListener({
-      name: 'preSave',
-      handler: ({ entry }) => {
-        const data = entry.get('data')?.toJS?.() || {};
-        const collection = entry.get('collection');
-        const slug = entry.get('slug');
-
-
-        const key = `draft:${collection}:${slug}`;
-        localStorage.setItem(key, JSON.stringify(data));
-
-        console.log(`[NetlifyCMS] Saved to localStorage: ${key}`, data);
-      },
-    });
   </script>
 </body>
 </html> 

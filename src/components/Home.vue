@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import MultiSelectBox from './MultiSelectBox.vue';
 import PdfTable from './PdfTable.vue';
-import LocalStorageBanner from './LocalStorageBanner.vue';
 import type { Pdf } from '../types/pdf';
 import { useFiltering } from '../composables/useFiltering';
 import fetchSiteConfig, {type SiteConfig } from '../helpers/fetchSiteConfig';
@@ -18,25 +17,10 @@ const siteConfig = ref<SiteConfig>({
   accent: '#4f46e5'
 });
 
-// Add a ref to track localStorage changes
-const localStorageVersion = ref(0);
-
-// Update the computed property to use the ref
-const hasLocalChanges = computed(() => {
-  // Access localStorageVersion to make the computed property reactive
-  localStorageVersion.value;
-  return Object.keys(localStorage).some(key => key.startsWith('draft:'));
-});
-
-// Add a function to update the localStorage version
-function updateLocalStorageVersion() {
-  localStorageVersion.value++;
-}
-
 const { filters, allTags, allGenres, allInstruments, filteredPdfs, clearFilters } = useFiltering(pdfs);
 const showFilters = ref(false);
 
-defineExpose({ pdfs, hasLocalChanges, updateLocalStorageVersion });
+defineExpose({ pdfs});
 
 // Close filters when clicking outside (only on md and above)
 const handleClickOutside = (event: MouseEvent) => {
@@ -67,45 +51,6 @@ onUnmounted(() => {
 
 
 
-// // Function to handle PDF file changes
-// async function handlePdfFileChange(slug: string, file: File) {
-//   try {
-    
-//     // Create or update the PDF entry in localStorage
-//     const existingPdf = pdfs.value.find(p => p.slug === slug);
-    
-//     const updatedPdf = existingPdf ? {
-//       ...existingPdf,
-//       file: `draft:pdfs:${slug}:file`
-//     } : {
-//       slug,
-//       title: file.name.replace('.pdf', ''),
-//       description: '',
-//       artists: [],
-//       instruments: [],
-//       genres: [],
-//       tags: [],
-//       file: `draft:pdfs:${slug}:file`
-//     };
-
-//     // Store in localStorage
-//     localStorage.setItem(`draft:pdfs:${slug}`, JSON.stringify(updatedPdf));
-
-//     // Update the PDF in the list if it exists
-//     const index = pdfs.value.findIndex(p => p.slug === slug);
-//     if (index !== -1) {
-//       pdfs.value[index] = updatedPdf;
-//     } else {
-//       pdfs.value.push(updatedPdf);
-//     }
-
-//     // Update localStorage version to trigger reactivity
-//     updateLocalStorageVersion();
-//   } catch (error) {
-//     console.error('Failed to save PDF file:', error);
-//   }
-// }
-
 
 onMounted(async () => {
   siteConfig.value = await fetchSiteConfig();
@@ -117,7 +62,6 @@ onMounted(async () => {
 
 <template>
   <div class="container mx-auto px-4 py-8">
-    <LocalStorageBanner :has-local-changes="hasLocalChanges" />
     <!-- Site Description -->
     <div class="px-4 sm:px-6 lg:px-8 mb-6">
       <p class="text-lg text-gray-600">{{ siteConfig.description }}</p>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import type { SiteConfig } from '../helpers/fetchSiteConfig';
 import fetchSiteConfig from '../helpers/fetchSiteConfig';
-import LocalStorageBanner from './LocalStorageBanner.vue';
 
 const siteConfig = ref<SiteConfig>({
   title: "Ricky Bob Dog's Collection",
@@ -13,9 +12,6 @@ const siteConfig = ref<SiteConfig>({
   accent: '#4f46e5'
 });
 
-const hasLocalChanges = computed(() => {
-  return !!localStorage.getItem('draft:site-config');
-});
 
 onMounted(async () => {
   siteConfig.value = await fetchSiteConfig();
@@ -31,8 +27,6 @@ onMounted(async () => {
             <span class="text-2xl font-semibold tracking-tight text-gray-800 md:text-4xl">{{ siteConfig.title }}</span>
         </div>
       </router-link>
-        <LocalStorageBanner 
-          :has-local-changes="hasLocalChanges" 
-        />
+
     </div>
 </template>

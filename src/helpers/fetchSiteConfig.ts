@@ -1,4 +1,3 @@
-import deepEqual from './deepEqual';
 
 export interface SiteConfig {
   title: string;
@@ -10,21 +9,11 @@ export interface SiteConfig {
 } 
 
 export default async function fetchSiteConfig() {
-  let siteConfig
+
     try {
         const configRes = await fetch('/site-config.json');
-        const configData = await configRes.json();
-        const localConfig = loadLocalConfig();
-        
-        if (localConfig && !deepEqual(localConfig, configData)) {
-          siteConfig = localConfig;
-        } else {
-          siteConfig = configData;
-          // Remove local config if it's identical to hosted
-          localStorage.removeItem('draft:site-config');
-        }
+        return await configRes.json();
 
-        return siteConfig;
       } catch (error) {
         console.error('Failed to load site configuration:', error);
       }
@@ -32,16 +21,3 @@ export default async function fetchSiteConfig() {
 
 }
 
-
-
-function loadLocalConfig(): SiteConfig | null {
-  const localConfig = localStorage.getItem('draft:site-config');
-  if (localConfig) {
-    try {
-      return JSON.parse(localConfig);
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
