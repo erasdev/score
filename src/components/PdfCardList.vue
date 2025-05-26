@@ -5,7 +5,7 @@ defineProps<{
 }>();
 </script>
 <template>
-    <div v-for="pdf in pdfs" :key="pdf.title" class="bg-white rounded-lg shadow ring-1 ring-gray-200 overflow-hidden">
+    <div v-for="pdf in pdfs" :key="pdf.title" class="bg-surface rounded-lg shadow ring-1 ring-gray-200 overflow-hidden">
         <div class="p-4">
           <div class="space-y-1">
             <h3 class="text-xl font-medium text-gray-800 break-words">{{ pdf.title }}</h3>
@@ -43,7 +43,7 @@ defineProps<{
 
           <div class="mt-4 flex justify-end">
             <a
-              :href="`/pdfs/${pdf.title}.pdf`"
+              :href="`/pdfs/${pdf.slug}`"
               target="_blank"
               class="inline-flex items-center gap-1.5 text-base font-medium text-accent hover:text-accent-dark"
             >

@@ -62,71 +62,71 @@ const goToPage = (page: number) => {
 <template>
 
   
-      <div class="flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table class="min-w-full ring-1 ring-inset ring-gray-300 bg-gray-50 rounded-md">
-              <thead>
-                <tr>
-                  <SortableTableHeader
-                    label="Title"
-                    sort-key="title"
-                    :current-sort-key="sortKey"
-                    :sort-direction="sortDirection"
-                    @sort="handleSort"
-                  />
-                  <SortableTableHeader
-                    label="Artist(s)"
-                    sort-key="artists"
-                    :current-sort-key="sortKey"
-                    :sort-direction="sortDirection"
-                    @sort="handleSort"
-                  />
-                  <SortableTableHeader
-                    label="Instrument(s)"
-                    sort-key="instruments"
-                    :current-sort-key="sortKey"
-                    :sort-direction="sortDirection"
-                    @sort="handleSort"
-                  />
-                  <SortableTableHeader
-                    label="Tags"
-                    sort-key="tags"
-                    :current-sort-key="sortKey"
-                    :sort-direction="sortDirection"
-                    @sort="handleSort"
-                  />
-                  <th scope="col" class="relative py-3.5 pr-0 pl-3">
-                    <span class="sr-only">View</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 ring-1 ring-inset ring-gray-300 rounded-b-md bg-white">
-                <PdfTableRow
-                  v-for="pdf in paginatedPdfs"
-                  :key="pdf.slug"
-                  :pdf="pdf"
+    <div class="flow-root">
+      <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+          <table class="min-w-full ring-1 ring-inset ring-gray-300 bg-gray-50 overflow-hidden rounded-md">
+            <thead>
+              <tr>
+                <SortableTableHeader
+                  label="Title"
+                  sort-key="title"
+                  :current-sort-key="sortKey"
+                  :sort-direction="sortDirection"
+                  @sort="handleSort"
                 />
-              </tbody>
-            </table>
-          </div>
+                <SortableTableHeader
+                  label="Artist(s)"
+                  sort-key="artists"
+                  :current-sort-key="sortKey"
+                  :sort-direction="sortDirection"
+                  @sort="handleSort"
+                />
+                <SortableTableHeader
+                  label="Instrument(s)"
+                  sort-key="instruments"
+                  :current-sort-key="sortKey"
+                  :sort-direction="sortDirection"
+                  @sort="handleSort"
+                />
+                <SortableTableHeader
+                  label="Tags"
+                  sort-key="tags"
+                  :current-sort-key="sortKey"
+                  :sort-direction="sortDirection"
+                  @sort="handleSort"
+                />
+                <th scope="col" class="relative py-3.5 pr-0 pl-3">
+                  <span class="sr-only">View</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 ring-1 ring-inset ring-gray-300 rounded-b-md bg-surface">
+              <PdfTableRow
+                v-for="pdf in paginatedPdfs"
+                :key="pdf.slug"
+                :pdf="pdf"
+              />
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between bg-white py-2">
+      <div class="flex items-center justify-between bg-background py-2">
         <div class="flex flex-1 justify-between sm:hidden">
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="relative inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-surface px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>
@@ -148,7 +148,7 @@ const goToPage = (page: number) => {
               <button
                 @click="goToPage(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 bg-surface text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span class="sr-only">Previous</span>
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -163,7 +163,7 @@ const goToPage = (page: number) => {
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold',
                   page === currentPage
                     ? 'z-10 bg-accent text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 bg-surface focus:outline-offset-0'
                 ]"
               >
                 {{ page }}
@@ -171,7 +171,7 @@ const goToPage = (page: number) => {
               <button
                 @click="goToPage(currentPage + 1)"
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 bg-surface text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span class="sr-only">Next</span>
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

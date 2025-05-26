@@ -11,7 +11,7 @@ const { clearFilters} = store;
 <template>
 
   <div data-filter-menu
-    class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow ring-1 ring-gray-300 z-50">
+    class="absolute right-0 mt-2 w-80 bg-surface rounded-md shadow ring-1 ring-gray-300 z-50">
     <div class="p-4 space-y-4 min-h-[320px] flex flex-col">
       <div>
         <label for="search" class="block text-base font-medium text-gray-800">Search</label>

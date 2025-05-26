@@ -9,7 +9,7 @@ const { filters, allTags, allGenres, allInstruments } = storeToRefs(store);
 const { clearFilters, closeFilters } = store;
 </script>
 <template>
-      <div class="p-4 mt-2 space-y-4 min-h-[320px] flex flex-col bg-white rounded-md shadow ring-1 ring-gray-300">
+      <div class="p-4 mt-2 space-y-4 min-h-[320px] flex flex-col bg-surface rounded-md shadow ring-1 ring-gray-300">
           <div class="flex justify-between items-center">
             <h2 class="text-xl font-medium text-gray-800">Filters</h2>
             <button
