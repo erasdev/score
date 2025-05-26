@@ -162,8 +162,8 @@ const goToPage = (page: number) => {
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold',
                   page === currentPage
-                    ? 'z-10 bg-accent-light text-accent-dark focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-                    : 'text-text-dark ring-1 ring-inset ring-gray-300 hover:bg-surface-light focus:z-20 bg-surface focus:outline-offset-0'
+                    ? 'z-10 bg-surface-light text-accent-dark focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+                    : 'text-text-dark ring-1 ring-inset ring-gray-300 hover:bg-surface-dark focus:z-20 bg-surface-light focus:outline-offset-0'
                 ]"
               >
                 {{ page }}

@@ -65,14 +65,6 @@ export function useTheme() {
         if(key.startsWith('color-')) {
           const oklchValue = hexToOklch(value);
           root.style.setProperty(`--${key}`, oklchValue);
-          
-          // Generate and set accent variants if this is the accent color
-          if (key === 'color-accent') {
-            const darkAccent = adjustOklchLightness(oklchValue, -0.1);
-            const lightAccent = adjustOklchLightness(oklchValue, 0.1);
-            root.style.setProperty('--color-accent-dark', darkAccent);
-            root.style.setProperty('--color-accent-light', lightAccent);
-          }
         }
       });
     } catch (error) {
