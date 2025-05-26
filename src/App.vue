@@ -6,7 +6,7 @@ useTheme()
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen bg-background overflow-y-scroll">
   <div class="max-w-6xl mx-auto p-4 py-8 space-y-8">
     <navigation/>
     <div>

@@ -68,19 +68,19 @@ onUnmounted(() => {
       <div
         data-input
         @click.stop="openDropdown"
-        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 cursor-pointer"
+        class="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-text-light shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-accent-light cursor-pointer"
       >
         <div class="flex flex-wrap gap-1.5 min-h-6 items-center">
-          <span v-if="modelValue.length === 0" class="text-gray-400">{{ placeholder }}</span>
+          <span v-if="modelValue.length === 0" class="text-text-light">{{ placeholder }}</span>
           <span
             v-for="option in modelValue"
             :key="option"
-            class="inline-flex items-center gap-1 rounded bg-indigo-50 px-2 py-0.5 text-sm text-indigo-700"
+            class="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-sm text-accent-dark"
           >
             {{ option }}
             <button
               @click.stop="removeOption(option)"
-              class="text-indigo-400 hover:text-indigo-600"
+              class="text-accent-light hover:text-accent-dark"
             >
               ×
             </button>
@@ -98,15 +98,15 @@ onUnmounted(() => {
             v-for="option in options"
             :key="option"
             @click.stop="toggleOption(option)"
-            class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-gray-50"
-            :class="{ 'bg-indigo-50': modelValue.includes(option) }"
+            class="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-accent-dark hover:text-accent-light"
+            :class="{ 'bg-accent-light': modelValue.includes(option) }"
           >
-            <span class="block truncate" :class="{ 'font-medium': modelValue.includes(option) }">
+            <span class="block truncate text" :class="{ 'font-medium': modelValue.includes(option) }">
               {{ option }}
             </span>
             <span
               v-if="modelValue.includes(option)"
-              class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600"
+              class="absolute inset-y-0 right-0 flex items-center pr-4 text-accent-dark"
             >
               ✓
             </span>

@@ -20,7 +20,7 @@ defineProps<{
     <td class="relative py-5 pr-4 pl-3 text-right text-base font-medium whitespace-nowrap">
       <div class="flex justify-end gap-2">
         <a
-          :href="`/pdfs/${pdf.title}.pdf`"
+          :href="`/pdfs/${pdf.slug}`"
           download
           class="text-accent hover:text-accent-dark"
         >

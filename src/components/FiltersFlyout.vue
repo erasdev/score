@@ -20,7 +20,7 @@ const { clearFilters} = store;
             id="search"
             v-model="filters.search"
             type="text"
-            class="block w-full rounded-md bg-surface-light px-3 py-1.5 text-base text-text-dark shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-text-light focus:ring-2 focus:ring-accent-light"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-text-dark shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-text-light focus:ring-2 focus:ring-accent-light"
             placeholder="Title or Artist..."
           />
         </div>
@@ -50,7 +50,7 @@ const { clearFilters} = store;
       <div class="pt-2 mt-auto border-t border-gray-200">
         <button
           @click="clearFilters"
-          class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-base font-medium text-text-dark bg-surface-light shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-surface-dark focus:outline-none focus:ring-2 focus:ring-accent-light">
+          class="w-full inline-flex justify-center items-center gap-2 px-3 py-1.5 text-base font-medium text-text-dark bg-accent-light shadow-sm ring-1 ring-inset ring-gray-300 rounded-md hover:bg-accent-dark hover:text-accent-light focus:outline-none focus:ring-2 focus:ring-accent-light">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
