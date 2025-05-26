@@ -46,8 +46,6 @@ const adjustOklchLightness = (oklch: string, amount: number): string => {
   return `oklch(${newL.toFixed(2)} ${c} ${h})`;
 };
 
-let isInitialized = false;
-
 export function useTheme() {
   const colors: Ref<ThemeColors> = ref({
     background: 'var(--color-background)',
@@ -57,39 +55,34 @@ export function useTheme() {
   });
 
   const loadThemeFromConfig = async () => {
-    if (isInitialized) return;
-    
     try {
-      const response = await fetch('/site-config.json');
+      // Add cache-busting query parameter
+      const response = await fetch(`/site-config.json?t=${Date.now()}`);
       const config = await response.json();
       
       // Update CSS variables with OKLCH values
       const root = document.documentElement;
       Object.entries(config).forEach(([key, value]) => {
         if(key.startsWith('color-')) {
-        const oklchValue = hexToOklch(value);
-        root.style.setProperty(`--color-${key}`, oklchValue);
-        
-        // Generate and set accent variants if this is the accent color
-        if (key === 'accent') {
-          const darkAccent = adjustOklchLightness(oklchValue, -0.1);
-          const lightAccent = adjustOklchLightness(oklchValue, 0.1);
-          root.style.setProperty('--color-accent-dark', darkAccent);
-          root.style.setProperty('--color-accent-light', lightAccent);
+          const oklchValue = hexToOklch(value);
+          root.style.setProperty(`--color-${key}`, oklchValue);
+          
+          // Generate and set accent variants if this is the accent color
+          if (key === 'accent') {
+            const darkAccent = adjustOklchLightness(oklchValue, -0.1);
+            const lightAccent = adjustOklchLightness(oklchValue, 0.1);
+            root.style.setProperty('--color-accent-dark', darkAccent);
+            root.style.setProperty('--color-accent-light', lightAccent);
+          }
         }
-    }
       });
-      
-      isInitialized = true;
     } catch (error) {
       console.error('Error loading theme from config:', error);
     }
   };
 
-  // Initialize theme if not already initialized
-  if (!isInitialized) {
-    loadThemeFromConfig();
-  }
+  // Always load theme on initialization
+  loadThemeFromConfig();
 
   return {
     colors,
