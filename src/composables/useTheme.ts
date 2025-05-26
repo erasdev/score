@@ -56,8 +56,7 @@ export function useTheme() {
 
   const loadThemeFromConfig = async () => {
     try {
-      // Add cache-busting query parameter
-      const response = await fetch(`/site-config.json?t=${Date.now()}`);
+      const response = await fetch(`/site-config.json`);
       const config = await response.json();
       
       // Update CSS variables with OKLCH values
