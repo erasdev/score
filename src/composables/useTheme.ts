@@ -2,10 +2,13 @@ import { ref } from 'vue';
 import type { Ref } from 'vue';
 
 interface ThemeColors {
-  background: string;
-  surface: string;
-  text: string;
-  accent: string;
+  'color-background': string;
+  'color-surface-light': string;
+  'color-surface-dark': string;
+  'color-text-light': string;
+  'color-text-dark': string;
+  'color-accent-light': string;
+  'color-accent-dark': string;
 }
 
 const hexToOklch = (hex: unknown): string => {
@@ -37,21 +40,16 @@ const hexToOklch = (hex: unknown): string => {
   return `oklch(${l.toFixed(2)} ${c.toFixed(2)} ${h.toFixed(2)})`;
 };
 
-const adjustOklchLightness = (oklch: string, amount: number): string => {
-  const match = oklch.match(/oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)/);
-  if (!match) return oklch;
-  
-  const [, l, c, h] = match;
-  const newL = Math.max(0, Math.min(1, parseFloat(l) + amount));
-  return `oklch(${newL.toFixed(2)} ${c} ${h})`;
-};
 
 export function useTheme() {
   const colors: Ref<ThemeColors> = ref({
-    background: 'var(--color-background)',
-    surface: 'var(--color-surface)',
-    text: 'var(--color-text)',
-    accent: 'var(--color-accent)',
+    'color-background': 'var(--color-background)',
+    'color-surface-light': 'var(--color-surface-light)',
+    'color-surface-dark': 'var(--color-surface-dark)',
+    'color-text-light': 'var(--color-text-light)',
+    'color-text-dark': 'var(--color-text-dark)',
+    'color-accent-light': 'var(--color-accent-light)',
+    'color-accent-dark': 'var(--color-accent-dark)',
   });
 
   const loadThemeFromConfig = async () => {
