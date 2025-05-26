@@ -4,10 +4,13 @@ import { join } from 'node:path';
 const defaultConfig = {
   title: "Ricky Bob Dog's Collection",
   description: "A collection of musical scores and arrangements.",
-  background: '#ffffff',  // White
-  surface: '#ffffff',     // White
-  text: '#1f2937',        // Gray-800
-  accent: '#4f46e5',      // Indigo-600
+  "color-background": '#ffffff',
+  "color-surface-light": '#ffffff',     
+  "color-surface-dark": '#f3f4f6',
+  "color-text-light": '#6b7280',
+  "color-text-dark": '#1f2937',
+  "color-accent-light": '#4f46e5',
+  "color-accent-dark": '#155e75',
 };
 
 // Ensure the public directory exists
