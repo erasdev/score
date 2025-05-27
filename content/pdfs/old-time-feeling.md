@@ -1,13 +1,13 @@
 ---
 title: Old Time Feeling
 artists:
-  - John Doe
+  - Guy Clark
 instruments:
-  - Uke
+  - Ukelele
 genres:
-  - old time
-description: some description
+  - Old Time
+description: A description for Old Time Feeling
 file: /uploads/old-time-feeling-in-c-for-uke-.pdf
 tags:
-  - easy
+  - Easy
 ---
